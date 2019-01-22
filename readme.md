@@ -19,21 +19,27 @@
 #### Scripts
 You can use the `g` command to generate controllers:
 
-```bash
-g controller
-The system will ask you enter your Controller name, then you can:
-
+```javascript
 # entering the alias
-new-controller-name
-# Your controller named `new-controller-name.controller.js` will be generated in src/controllers
-# Your route names named `new-controller-name.route.js` will be generated in src/routes
-# Your schema named `new-controller-name.schema.js` will be generated in src/schemas
+g controller
 
-# or entering relative path generation
+# The system will ask you enter your Controller name, then you can:
+
+# Entering the alias
+new-controller-name
+/**
+ * Your controller named `new-controller-name.controller.js` will be generated in src/controllers
+ * Your route names named `new-controller-name.route.js` will be generated in src/routes
+ * Your schema named `new-controller-name.schema.js` will be generated in src/schemas
+ */
+
+# Or entering relative path generation
 admin/feature/new-controller-name
-# Your controller will be generated in src/controllers/admin/feature
-# Your route will be generated in src/routes/admin/feature
-# Your schema will be generated in src/schemas/admin/feature
+/**
+ * Your controller will be generated in src/controllers/admin/feature
+ * Your route will be generated in src/routes/admin/feature
+ * Your schema will be generated in src/schemas/admin/feature
+ */
 
 ```
 You can find all possible blueprints in the table below:
