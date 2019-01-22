@@ -105,12 +105,14 @@ newFileObj = (type, fileName) => {
 };
 
 defineActions = (hasAction) => {
-  let newFiles = {
-    controller: newFileObj('controller', dataForGenerating.controllerName),
-    route: newFileObj('route', dataForGenerating.controllerName),
-    schema: newFileObj('schema', dataForGenerating.controllerName)
-  };
-  todoList = { ...todoList, ...newFiles };
+  if (dataForGenerating.controllerName) {
+    let newFiles = {
+      controller: newFileObj('controller', dataForGenerating.controllerName),
+      route: newFileObj('route', dataForGenerating.controllerName),
+      schema: newFileObj('schema', dataForGenerating.controllerName)
+    };
+    todoList = { ...todoList, ...newFiles };
+  }
   processFiles();
 }
 
