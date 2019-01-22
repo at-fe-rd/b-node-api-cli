@@ -1,4 +1,5 @@
-# A Node Generating project, it uses MongoDB, Fastify and Swagger.
+# NFAG 
+A Node API Generating project. It uses MongoDB, Fastify and Swagger.
 
 ## Prerequisites
 - Nodejs
