@@ -7,6 +7,9 @@
     "start": "./node_modules/nodemon/bin/nodemon.js ./src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "g": "./bin/execute"
+  },
   "author": "Siegfried Grimbeek <siegfried.grimbeek@gmail.com> (www.siegfriedgrimbeek.co.za)",
   "license": "ISC",
   "dependencies": {
@@ -14,7 +17,20 @@
     "fastify": "^1.13.0",
     "fastify-mongodb": "^0.9.1",
     "fastify-swagger": "^0.15.3",
+    "module-alias": "^2.1.0",
     "mongoose": "^5.3.14",
     "nodemon": "^1.18.7"
+  },
+  "devDependencies": {
+    "fs": "0.0.1-security",
+    "inquirer": "^6.2.1",
+    "shelljs": "^0.8.3"
+  },
+  "_moduleAliases": {
+    "@core": "./src/core",
+    "@controllers": "./src/controllers",
+    "@models": "./src/models",
+    "@routes": "./src/routes",
+    "@schemas": "./src/schemas"
   }
 }

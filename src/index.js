@@ -1,13 +1,30 @@
+// Require the module alias
+require('module-alias/register')
+
 // Require the fastify framework and instantiate it
 const fastify = require('fastify')({
-  logger: true
+  logger: {
+    prettyPrint: true,
+    serializers: {
+      req(req) {
+        return {
+          method: req.method,
+          url: req.url,
+          path: req.path,
+          parameters: req.parameters,
+          body: req.body,
+          headers: req.headers,
+        };
+      }
+    }
+  }
 })
 
 // Require external modules
 const mongoose = require('mongoose')
 
 // Import Routes
-const routes = require('./routes')
+const routes = require('./routes/app.route')
 
 // Import Swagger Options
 const swagger = require('./config/swagger')
