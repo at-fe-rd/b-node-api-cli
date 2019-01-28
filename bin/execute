@@ -103,7 +103,7 @@ newFileObj = (type, fileName) => {
   }
   return {
     dir: `${srcDir}${folderOfType}${dataForGenerating.folderName}`,
-    folderName: dataForGenerating.folderName ? `/${dataForGenerating.folderName}` : '',
+    folderName: dataForGenerating.folderName ? `${dataForGenerating.folderName}` : '',
     fileName: `${fileName}.${type}.js`,
     templateDir: dataForGenerating.templateDir || templateCrudDir,
     name: objName,
@@ -254,17 +254,17 @@ createDirectoryContents = (target, isRoute = false) => {
       let contents = fs.readFileSync(origFilePath, 'utf8');
       contents = contents.replace(/__MODEL__/g, target['name']);
       if (target['folderName']) {
-        thirdReplace = `,\n\t'dir: ${target['folderName']}/'`
+        thirdReplace = `,\n\tdir: '${target['folderName']}'`
       } else {
         thirdReplace = '';
       }
-      if (target['hasCustom']) {
-        secondReplace = `,\n\tpathName: ${dataForGenerating.routeName}`;
+      if (dataForGenerating.hasCustom) {
+        secondReplace = `,\n\tpath: '${dataForGenerating.routeName}'`;
       } else {
         secondReplace = '';
       }
-      contents = contents.replace(/'__PATH__'/g, secondReplace);
       contents = contents.replace(/'__DIR__'/g, thirdReplace);
+      contents = contents.replace(/'__PATH__'/g, secondReplace);
       fs.writeFileSync(writePath, contents, 'utf8');
       // define message after file created
       notifications.added.push({

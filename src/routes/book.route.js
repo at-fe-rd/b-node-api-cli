@@ -1,5 +1,5 @@
 let { routes } = require('@core/based/route')({
-  model: 'book'
+  controller: 'book'
 })
 
 /**

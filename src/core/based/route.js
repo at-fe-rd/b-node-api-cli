@@ -1,19 +1,20 @@
 module.exports = (options) => {
   const defaultOptions = {
-    model: '',
+    controller: '',
     dir: '',
-    pathName: false
+    path: false
   }
-  const { model, dir, pathName } = { ...defaultOptions, ...options }
+  const { controller, dir, path } = { ...defaultOptions, ...options }
+  const relativeDir = `${dir}/${controller}`;
 
   // Import Controllers
-  const handler = require(`@controllers/${dir}${model}.controller`)[`${model}Action`]
+  const handler = require(`@controllers/${relativeDir}.controller`)[`${controller}Action`]
 
   // Import Swagger documentation & get Schema
-  const schema = require(`@schemas/${dir}${model}.schema`)[`${model}Schema`]
+  const schema = require(`@schemas/${relativeDir}.schema`)[`${controller}Schema`]
 
   // Define url
-  const route = pathName ? `${dir}${pathName}` : `${dir}${model}s`;
+  const route = path ? `${path}` : `${relativeDir}s`;
 
   return {
     handler: handler,
