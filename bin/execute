@@ -254,7 +254,7 @@ createDirectoryContents = (target, isRoute = false) => {
       let contents = fs.readFileSync(origFilePath, 'utf8');
       contents = contents.replace(/__MODEL__/g, target['name']);
       if (target['folderName']) {
-        thirdReplace = `,\n\tdir: '${target['folderName']}'`
+        thirdReplace = `,\n\tdir: '${target['folderName']}/'`
       } else {
         thirdReplace = '';
       }

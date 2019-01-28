@@ -2,10 +2,11 @@ module.exports = (options) => {
   const defaultOptions = {
     controller: '',
     dir: '',
-    path: false
+    path: undefined
   }
   const { controller, dir, path } = { ...defaultOptions, ...options }
-  const relativeDir = `${dir}/${controller}`;
+  const relativeDir = `${dir}${controller}`
+  console.log(relativeDir, controller, dir, path);
 
   // Import Controllers
   const handler = require(`@controllers/${relativeDir}.controller`)[`${controller}Action`]
@@ -14,7 +15,7 @@ module.exports = (options) => {
   const schema = require(`@schemas/${relativeDir}.schema`)[`${controller}Schema`]
 
   // Define url
-  const route = path ? `${path}` : `${relativeDir}s`;
+  const route = path ? `${path}` : `${relativeDir}s`
 
   return {
     handler: handler,

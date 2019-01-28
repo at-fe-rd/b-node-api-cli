@@ -1,5 +1,5 @@
 let { controller, uri, routes } = require('@core/based/route')({
-  model: '__MODEL__''__PATH__''__DIR__'
+  controller: '__MODEL__''__PATH__''__DIR__'
 })
 
 /**
