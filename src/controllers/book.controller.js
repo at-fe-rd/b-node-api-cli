@@ -1,9 +1,9 @@
-let { actions } = require('@core/base/controller')(
-  'book'
-)
+let { actions } = require('@core/based/controller')({
+  model: 'book'
+})
 
 /**
  * Adding new action here
  */
 
-module.exports = actions
+exports.bookAction = actions

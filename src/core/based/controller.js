@@ -1,7 +1,9 @@
-module.exports = (model) => {
-  // External Dependancies
+module.exports = (options) => {
+
+  // External Dependencies
   const boom = require('boom')
-  
+  // Get options
+  const { model } = options
   // Get Data Models
   const dataModel = require(`@models/${model}.model`)
   

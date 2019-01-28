@@ -1,13 +1,19 @@
-module.exports = (controller, isUncountable = false, dir = '') => {
+module.exports = (options) => {
+  const defaultOptions = {
+    model: '',
+    dir: '',
+    pathName: false
+  }
+  const { model, dir, pathName } = { ...defaultOptions, ...options }
 
   // Import Controllers
-  const handler = require(`@controllers/${dir}${controller}.controller`)
+  const handler = require(`@controllers/${dir}${model}.controller`)[`${model}Action`]
 
   // Import Swagger documentation & get Schema
-  const schema = require(`@schemas/${dir}${controller}.schema`)[`${controller}Schema`]
+  const schema = require(`@schemas/${dir}${model}.schema`)[`${model}Schema`]
 
   // Define url
-  const route = isUncountable ? `${dir}${controller}` : `${dir}${controller}s`;
+  const route = pathName ? `${dir}${pathName}` : `${dir}${model}s`;
 
   return {
     handler: handler,

@@ -1,6 +1,6 @@
-let { controller, uri, routes } = require('@core/base/route')(
-  'book'
-)
+let { routes } = require('@core/based/route')({
+  model: 'book'
+})
 
 /**
  * Adding new route here

@@ -35,7 +35,7 @@ let dataForGenerating = {
   routeName: '',
   url: '',
   folderName: '',
-  isUncountable: false
+  hasCustom: false
 };
 
 const INQUIRER_STEPS = {
@@ -66,9 +66,16 @@ const INQUIRER_STEPS = {
   route: (name) => {
     return {
       name: 'name',
-      type: 'list',
-      message: 'Choise the right route?',
-      choices: [`${name}s`, name]
+      type: 'input',
+      message: 'Enter the right route?',
+      default: `${name}s`,
+      validate: function (input) {
+        if (/^([a-z]+(-[a-z]+)*)+(\/([a-z]+(-[a-z]+)*))*$/g.test(input)) {
+          return true;
+        } else {
+          return 'Route name may only include lower letters or kebab-case.';
+        }
+      }
     }
   }
 };
@@ -152,7 +159,7 @@ generator = {
         }
       ];
       await inquirer.prompt(QUESTIONS).then(async(route) => {
-        dataForGenerating.isUncountable = route['name'] === controllerName;
+        dataForGenerating.hasCustom = route['name'] !== `${controllerName}s`;
         dataForGenerating.routeName = route['name'];
         if (route['hasAction']) {
           await inquirer.prompt(INQUIRER_STEPS.model).then(async(model) => {
@@ -163,6 +170,7 @@ generator = {
     });
     if (dataForGenerating.modelName) {
       dataForGenerating.templateDir = templateCrudDir;
+      todoList.model = newFileObj('model', dataForGenerating.modelName);
     } else {
       dataForGenerating.templateDir = templateNewDir;
     }
@@ -205,7 +213,7 @@ processFiles = () => {
       createDirectoryContents(target, key === 'route');
     }
   }
-  processNotifications();
+  // processNotifications();
 }
 
 processNotifications = () => {
@@ -246,13 +254,16 @@ createDirectoryContents = (target, isRoute = false) => {
       let contents = fs.readFileSync(origFilePath, 'utf8');
       contents = contents.replace(/__MODEL__/g, target['name']);
       if (target['folderName']) {
-        secondReplace = target['isUncountable'] ? ',\n\ttrue' : ',\n\tfalse';
-        thirdReplace = `,\n\t'${target['folderName']}/'`
+        thirdReplace = `,\n\t'dir: ${target['folderName']}/'`
       } else {
-        secondReplace = target['isUncountable'] ? ',\n\ttrue' : '';
         thirdReplace = '';
       }
-      contents = contents.replace(/'__ISUNCOUNTABLE__'/g, secondReplace);
+      if (target['hasCustom']) {
+        secondReplace = `,\n\tpathName: ${dataForGenerating.routeName}`;
+      } else {
+        secondReplace = '';
+      }
+      contents = contents.replace(/'__PATH__'/g, secondReplace);
       contents = contents.replace(/'__DIR__'/g, thirdReplace);
       fs.writeFileSync(writePath, contents, 'utf8');
       // define message after file created

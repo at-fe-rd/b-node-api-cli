@@ -24,5 +24,5 @@
 // }
 
 exports.bookSchema = {
-  // adding schema here
+  // schema here
 }
