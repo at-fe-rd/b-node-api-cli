@@ -10,7 +10,7 @@
   "bin": {
     "naf": "./bin/execute"
   },
-  "author": "Siegfried Grimbeek <siegfried.grimbeek@gmail.com> (www.siegfriedgrimbeek.co.za)",
+  "author": "Vix Nguyen <vix.nguyen@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "boom": "^7.2.2",
