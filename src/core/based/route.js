@@ -5,54 +5,54 @@ module.exports = (options) => {
     path: undefined
   }
   const { controller, dir, path } = { ...defaultOptions, ...options }
-  const relativeDir = `${dir}${controller}`
+  const relativePath = `${dir}${controller}`
 
   // Import Controllers
-  const handler = require(`@controllers/${relativeDir}.controller`)[`${controller}Action`]
+  const handler = require(`@controllers/${relativePath}.controller`)[`${controller}Action`]
 
   // Import Swagger documentation & get Schema
-  const schema = require(`@schemas/${relativeDir}.schema`)[`${controller}Schema`]
+  const schema = require(`@schemas/${relativePath}.schema`)[`${controller}Schema`]
 
   // Define url
-  const route = path ? `${path}` : `${relativeDir}s`
+  const route = path ? `/${path}` : `/${relativePath}s`
 
   return {
     handler: handler,
     schema: schema,
-    route: route,
+    path: route,
     routes: [
       {
         method: 'GET',
-        url: `/${route}`,
+        url: `${route}`,
         handler: handler.index,
         schema: schema.index || null
       },
       {
         method: 'GET',
-        url: `/${route}/test`,
+        url: `${route}/test`,
         handler: handler.test
       },
       {
         method: 'GET',
-        url: `/${route}/:id`,
+        url: `${route}/:id`,
         handler: handler.read,
         schema: schema.read || null
       },
       {
         method: 'POST',
-        url: `/${route}`,
+        url: `${route}`,
         handler: handler.create,
         schema: schema.create || null
       },
       {
         method: 'PUT',
-        url: `/${route}/:id`,
+        url: `${route}/:id`,
         handler: handler.update,
         schema: schema.update || null
       },
       {
         method: 'DELETE',
-        url: `/${route}/:id`,
+        url: `${route}/:id`,
         handler: handler.delete,
         schema: schema.delete || null
       }

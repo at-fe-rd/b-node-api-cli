@@ -151,7 +151,8 @@ newFileObj = (type, fileName) => {
   } else if (type === 'route') {
     // objName = dataForGenerating.routeName
   }
-  if (dataForGenerating.folderName) {
+  // all models will generating in root of models folder
+  if (dataForGenerating.folderName && type !== 'model') {
     folderDir = `/${dataForGenerating.folderName}`;
   }
   return {
