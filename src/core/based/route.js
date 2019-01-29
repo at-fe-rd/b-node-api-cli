@@ -6,7 +6,6 @@ module.exports = (options) => {
   }
   const { controller, dir, path } = { ...defaultOptions, ...options }
   const relativeDir = `${dir}${controller}`
-  console.log(relativeDir, controller, dir, path);
 
   // Import Controllers
   const handler = require(`@controllers/${relativeDir}.controller`)[`${controller}Action`]
