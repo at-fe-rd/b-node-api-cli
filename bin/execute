@@ -2,7 +2,7 @@
 /**
  * This is readonly file
  */
-const cmdAlias = 'g';
+const cmdAlias = 'naf';
 const inquirer = require('inquirer');
 const fs = require('fs');
 const shell = require('shelljs');
