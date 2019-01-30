@@ -10,7 +10,7 @@ let { actions } = require('@core/based/controller')({
  * }
  * or
  * const newActions = {
- *  filterByName = (req, reply) => {
+ *  filterByName: (req, reply) => {
  *    // todo
  *  }
  * }
