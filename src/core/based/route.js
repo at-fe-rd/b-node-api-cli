@@ -1,3 +1,19 @@
+/**
+ * For extending CRUD routes for specific controller
+ * @param {*} options 
+ * {
+ *    controller: is a controller name
+ *    dir: the directory of the controller, it is additional
+ *    path: the custom path for route, it is additional
+ * }
+ * @returns {*} anonymous object
+ * {
+ *    handler: controller action to handle logical code
+ *    path: the correct path for route
+ *    schema: the api documentation
+ *    routes: an array of crud routes
+ * }
+ */
 module.exports = (options) => {
   const defaultOptions = {
     controller: '',

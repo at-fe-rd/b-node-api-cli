@@ -1,4 +1,4 @@
-let { controller, uri, routes } = require('@core/based/route')({
+let { routes } = require('@core/based/route')({
   controller: '__MODEL__''__PATH__''__DIR__'
 })
 

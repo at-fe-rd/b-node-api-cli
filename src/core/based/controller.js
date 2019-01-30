@@ -1,3 +1,16 @@
+/**
+ * For extending CRUD action for specific model
+ * @param {*} options
+ * {
+ *    model: an alias of the model
+ * }
+ * @returns {*} anonymous object
+ * {
+ *    boom: is an object for handling error 
+ *    model: data model for processing actions
+ *    actions: is based action included CRUD and test action
+ * }
+ */
 module.exports = (options) => {
 
   // External Dependencies
