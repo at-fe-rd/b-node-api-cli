@@ -10,7 +10,7 @@
   "bin": {
     "naf": "./bin/execute"
   },
-  "author": "Vix Nguyen <vix.nguyen@gmail.com>",
+  "author": "Vix Nguyen <vinguyen.fitsgu@gmail.com>",
   "license": "ISC",
   "dependencies": {
     "boom": "^7.2.2",
