@@ -1,3 +1,10 @@
+/**
+ * The importer will return four objects
+ * 1. handler: controller action to handle logical code
+ * 2. path: the correct path for route
+ * 3. schema: the api documentation
+ * 4. routes: an array of crud routes
+ */
 let { routes } = require('@core/based/route')({
   controller: '__MODEL__''__PATH__''__DIR__'
 })
