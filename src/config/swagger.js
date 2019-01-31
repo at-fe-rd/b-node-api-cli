@@ -3,8 +3,8 @@ exports.options = {
   exposeRoute: true,
   swagger: {
     info: {
-      title: 'Fastify API',
-      description: 'Building a blazing fast REST API with Node.js, MongoDB, Fastify and Swagger',
+      title: 'Node API with Fastify',
+      description: 'A CLI project, It helps to build a fast REST APIs with Node.js, MongoDB, Fastify and Swagger.',
       version: '1.0.0'
     },
     externalDocs: {

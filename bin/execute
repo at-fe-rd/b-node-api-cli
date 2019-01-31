@@ -2,7 +2,7 @@
 /**
  * This is readonly file
  */
-const cmdAlias = 'g';
+const cmdAlias = 'naf';
 const inquirer = require('inquirer');
 const fs = require('fs');
 const shell = require('shelljs');
@@ -10,12 +10,18 @@ const chalk = require('chalk');
 
 const projectDir = process.cwd();
 const srcDir = `${projectDir}/src/`;
+// template dir for crud action
 const templateCrudDir = `${projectDir}/bin/templates/crud/`;
+// template dir for empty file
 const templateNewDir = `${projectDir}/bin/templates/new/`;
 const routeDir = `${srcDir}routes/`;
 
+// get from node process
 const actor = process.argv[2];
 
+/**
+ * Store metadata for files creating
+ */
 let todoList = {
   controller: null,
   model: null,
@@ -23,31 +29,57 @@ let todoList = {
   schema: null
 };
 
+/**
+ * Store notifications
+ * @output added
+ * @output failed
+ * @output modified
+ */
 let notifications = {
   added: [],
   failed: [],
   modified: []
 };
 
+/**
+ * Store some common informations to create files
+ * @note: hasCustom is a boolean, it is enabled when special value was set for route name
+ */
 let dataForGenerating = {
   controllerName: '',
   modelName: '',
   routeName: '',
   url: '',
   folderName: '',
-  isUncountable: false
+  hasCustom: false
 };
 
+/**
+ * Regrex definitions
+ * 1. Model for model name validation
+ * 2. Controller for controller and route name validation
+ */
+const INQUIRER_REGEX = {
+  model: /^[a-z]+(-[a-z]+)*$/g,
+  controller: /^([a-z]+(-[a-z]+)*)+(\/([a-z]+(-[a-z]+)*))*$/g
+};
+
+/**
+ * General steps for generating file
+ * 1. Model
+ * 2. Controller
+ * 3. Route
+ */
 const INQUIRER_STEPS = {
   model: {
     name: 'name',
     type: 'input',
     message: 'Enter your Model name:',
     validate: function (input) {
-      if (/^[a-z]+(-[a-z]+)*$/g.test(input)) {
+      if (INQUIRER_REGEX.model.test(input)) {
         return true;
       } else {
-        return 'Model name may only include lower letters or kebab-case.';
+        return 'Model name should be an alias (lower letters - kebab-case).';
       }
     }
   },
@@ -56,54 +88,86 @@ const INQUIRER_STEPS = {
     type: 'input',
     message: 'Enter your Controller:',
     validate: function (input) {
-      if (/^([a-z]+(-[a-z]+)*)+(\/([a-z]+(-[a-z]+)*))*$/g.test(input)) {
+      if (INQUIRER_REGEX.controller.test(input)) {
         return true;
       } else {
-        return 'Controller name may only include lower letters or kebab-case.';
+        return 'Controller name should be an alias or relative path.';
       }
     }
   },
   route: (name) => {
     return {
       name: 'name',
-      type: 'list',
-      message: 'Choise the right route?',
-      choices: [`${name}s`, name]
+      type: 'input',
+      message: 'Enter Route name:',
+      default: `${name}s`,
+      validate: function (input) {
+        if (INQUIRER_REGEX.controller.test(input)) {
+          return true;
+        } else {
+          return 'Route name should be an alias or relative path.';
+        }
+      }
     }
   }
 };
 
+/**
+ * Steps for creating model
+ * @steps
+ * 1. Require enter model name
+ * 2. Ask for creating CRUD actions and controller
+ */
 const CREATING_MODEL_STEPS = [
   INQUIRER_STEPS.model,
   {
     name: 'hasAction',
     type: 'confirm',
-    message: 'Init CRUD actions and routing?'
+    message: 'Initing CRUD actions and routing?'
   }
 ];
 
+/**
+ * Steps for creating controller
+ * @steps
+ * 1. Require enter controller name
+ */
 const CREATING_CONTROLLER_STEPS = [
   INQUIRER_STEPS.controller
 ];
 
+/**
+ * Define metadata to create new file
+ * @param type is type of file ['model', 'controller', 'route', 'schema']
+ * @param fileName is name of file
+ * @output new object it's contain a file metadata
+ */
 newFileObj = (type, fileName) => {
   let folderOfType = `${type}s`;
   let objName = fileName;
+  let folderDir = '';
   if (type === 'schema') {
     objName = kebabToCamel(fileName);
   } else if (type === 'route') {
     // objName = dataForGenerating.routeName
   }
+  // all models will generating in root of models folder
+  if (dataForGenerating.folderName && type !== 'model') {
+    folderDir = `/${dataForGenerating.folderName}`;
+  }
   return {
-    dir: `${srcDir}${folderOfType}${dataForGenerating.folderName}`,
-    folderName: dataForGenerating.folderName ? `/${dataForGenerating.folderName}` : '',
-    fileName: `${fileName}.${type}.js`,
-    templateDir: dataForGenerating.templateDir || templateCrudDir,
+    type: type,
     name: objName,
-    type: type
+    fileName: `${fileName}.${type}.js`,
+    dir: `${srcDir}${folderOfType}${folderDir}`,
+    folderName: dataForGenerating.folderName,
+    templateDir: dataForGenerating.templateDir || templateCrudDir
   }
 };
 
+/**
+ * Adding task to todolist if have controller
+ */
 defineActions = (hasAction) => {
   if (dataForGenerating.controllerName) {
     let newFiles = {
@@ -116,6 +180,15 @@ defineActions = (hasAction) => {
   processFiles();
 }
 
+/**
+ * Define bash script
+ * @options 
+ * {
+ *    model: for creating model and the advance options allowing create CRUD actions, controler, schema, route too,
+ *    controller: for creating contoller and the advance options allowing create CRUD actions for a specific model,
+ *    help: for help
+ * }
+ */
 generator = {
   model: async () => {
     await inquirer.prompt(CREATING_MODEL_STEPS).then(async(model) => {
@@ -124,13 +197,15 @@ generator = {
       todoList.model = newFileObj('model', modelName);
       if (model['hasAction']) {
         const QUESTIONS = [
+          // require enter route name
           INQUIRER_STEPS.route(modelName)
         ];
-        await inquirer.prompt(QUESTIONS).then((choices) => {
+        await inquirer.prompt(QUESTIONS).then((route) => {
+          dataForGenerating.hasCustom = route['name'] !== `${modelName}s`;
           // define data to create controller file
           dataForGenerating.controllerName = modelName;
           // define data to create route file
-          dataForGenerating.routeName = modelName;
+          dataForGenerating.routeName = dataForGenerating.hasCustom ? route['name'] : modelName;
           // define data to create schema file
           dataForGenerating.schemaName = modelName;
         });
@@ -142,28 +217,40 @@ generator = {
     await inquirer.prompt(CREATING_CONTROLLER_STEPS).then(async(controller) => {
       const controllerName = controller['name'];
       analystController(controllerName);
+      /**
+       * Steps for creating route
+       * @steps
+       * 1. Require enter route name, default value is recommended
+       * 2. Ask for creating CRUD actions for specific model
+       */
       const QUESTIONS = [
         INQUIRER_STEPS.route(controllerName),
         {
           name: 'hasAction',
           type: 'confirm',
-          message: 'Init CRUD actions?',
+          message: 'Initing CRUD actions?',
           default: false
         }
       ];
       await inquirer.prompt(QUESTIONS).then(async(route) => {
-        dataForGenerating.isUncountable = route['name'] === controllerName;
+        dataForGenerating.hasCustom = route['name'] !== `${controllerName}s`;
         dataForGenerating.routeName = route['name'];
+        // if CRUD actions are choosed
         if (route['hasAction']) {
+          // Require enter model name
           await inquirer.prompt(INQUIRER_STEPS.model).then(async(model) => {
             dataForGenerating.modelName = model['name'];
           });
         }
       });
     });
+    // if CRUD actions are choosed
     if (dataForGenerating.modelName) {
+      // template is crud template
       dataForGenerating.templateDir = templateCrudDir;
+      todoList.model = newFileObj('model', dataForGenerating.modelName);
     } else {
+      // template is empty template
       dataForGenerating.templateDir = templateNewDir;
     }
     defineActions();
@@ -174,6 +261,9 @@ generator = {
   }
 }
 
+/**
+ * Main duty
+ */
 run = () => {
   if (generator[actor] && typeof generator[actor] === 'function') {
     generator[actor]();
@@ -182,21 +272,32 @@ run = () => {
   }
 }
 
+/**
+ * Analyst Controller
+ * Analyst controller name which enter from cmd to two patterns:
+ * 1. Controller name
+ * 2. A folder contained controller
+ */
 analystController = (str) => {
   let hasFolder = false;
   let arr = str.split('/');
   let length = arr.length;
-  let folderName = '';
   if (length === 1) {
+    // controller name is an alias
     dataForGenerating.controllerName = arr[0];
   } else {
+    // controller name is an a relative path
     hasFolder = true;
+    // set controller name is last path of the input
     dataForGenerating.controllerName = arr[length - 1];
+    // set folder name is remain of input excluded controller name
     dataForGenerating.folderName = str.replace(`/${dataForGenerating.controllerName}`, '');
-    dataForGenerating.folderName = `/${dataForGenerating.folderName}`;
   }
 }
 
+/**
+ * Process file
+ */
 processFiles = () => {
   let target = {};
   for (let key in todoList) {
@@ -208,6 +309,9 @@ processFiles = () => {
   processNotifications();
 }
 
+/**
+ * Display notifications after files created
+ */
 processNotifications = () => {
   const typeMsgs = {
     added: `File(s) added:`
@@ -224,15 +328,22 @@ processNotifications = () => {
   }
 }
 
+/**
+ * Generating new file
+ * @params target is file output metadata
+ * @params isRoute check if the output file is route or not? to process another action
+ */
 createDirectoryContents = (target, isRoute = false) => {
   if (!fs.existsSync(target['dir'])) {
     shell.mkdir('-p', target['dir']);
   }
+  // get template file
   const origFilePath = `${target['templateDir']}${target['type']}.js`;
   const stats = fs.statSync(origFilePath);
   let fileCreated = '';
   let secondReplace = '';
   let thirdReplace = ''
+  // check file or folder
   if (stats.isFile()) {
     const writePath = `${target['dir']}/${target['fileName']}`;
     if (fs.existsSync(writePath)) {
@@ -243,17 +354,27 @@ createDirectoryContents = (target, isRoute = false) => {
         msgType: 'red'
       });
     } else {
+      // read template content
       let contents = fs.readFileSync(origFilePath, 'utf8');
+      // modify content
       contents = contents.replace(/__MODEL__/g, target['name']);
+      // if file contained in nested folder, declare it to get correct route
       if (target['folderName']) {
-        secondReplace = target['isUncountable'] ? ',\n\ttrue' : ',\n\tfalse';
-        thirdReplace = `,\n\t'${target['folderName']}/'`
+        thirdReplace = `,\n\tdir: '${target['folderName']}/'`
       } else {
-        secondReplace = target['isUncountable'] ? ',\n\ttrue' : '';
         thirdReplace = '';
       }
-      contents = contents.replace(/'__ISUNCOUNTABLE__'/g, secondReplace);
+      // if specific path is defined, transfer it to get correct route
+      if (dataForGenerating.hasCustom) {
+        secondReplace = `,\n\tpath: '${dataForGenerating.routeName}'`;
+      } else {
+        secondReplace = '';
+      }
+      // modify content
       contents = contents.replace(/'__DIR__'/g, thirdReplace);
+      // modify content
+      contents = contents.replace(/'__PATH__'/g, secondReplace);
+      // create a new file with contents
       fs.writeFileSync(writePath, contents, 'utf8');
       // define message after file created
       notifications.added.push({
@@ -284,6 +405,11 @@ createDirectoryContents = (target, isRoute = false) => {
   }
 }
 
+/**
+ * Modify App Route
+ * Modify app route if the new route was created
+ * @param name is name of  the new route, which just created
+ */
 modifyAppRoute = (name) => {
   const indexRoutes = `${routeDir}app.route.js`;
   const routeName = `${name}Route`;
@@ -301,6 +427,7 @@ modifyAppRoute = (name) => {
 
   // app route has content & the new route contained in root route folder
   if (regex.test(fileContents) && !dataForGenerating.folderName) {
+    // check content of the app route to modify right way
     switch (true) {
       case checkModuleNull.test(fileContents):
         break;
@@ -312,9 +439,12 @@ modifyAppRoute = (name) => {
       default:
         fileContents = fileContents.replace(/\n*\]/g, `,\n]`);
     }
+    // pushing new route inside module export
     fileContents = fileContents.replace(/\n*\]/g, `\n\t...${routeName}\n]`);
     fileContents = fileContents.replace(checkBreakline, '\n');
+    // requiring new route before module export
     fileContents = fileContents.replace(findModuleToInsertImport, `\nconst ${routeName} = require('./${routeFile}')\n`);
+    // apply new content to the app route
     fs.writeFileSync(`${indexRoutes}`, fileContents, 'utf8');
     return `${indexRoutes}`;
   } else {
@@ -322,12 +452,22 @@ modifyAppRoute = (name) => {
   }
 }
 
+/**
+ * Transform data
+ * @input abc-zyz
+ * @output abcXyz
+ */
 kebabToCamel = (string) => {
   return string = string.replace(/-([a-z])/g, (g) => {
     return g[1].toUpperCase(); 
   });
 };
 
+/**
+ * Transform data
+ * @input abc-zyz
+ * @output AbcXyz
+ */
 kebabToUpperCamel = (string) => {
   string = string.replace(/-([a-z])/g, (g) => {
     return g[1].toUpperCase(); 
